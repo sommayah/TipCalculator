@@ -30,12 +30,17 @@ class ViewController: UIViewController {
         let defaults = UserDefaults.standard
         let tip = defaults.integer(forKey: "tip_percentage")
         tipControl.selectedSegmentIndex = tip
+        let bill = defaults.double(forKey:"bill_value")
+        if(bill != 0){
+            billField.text = String(format: "%.2f", bill)
+        }
         updateTip()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         let defaults = UserDefaults.standard
         defaults.set(tipControl.selectedSegmentIndex, forKey: "tip_percentage")
+        defaults.set(Double(billField.text!) ?? 0, forKey:"bill_value")
         defaults.synchronize()
     }
     
