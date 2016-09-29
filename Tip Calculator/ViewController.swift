@@ -17,6 +17,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        let locale = Locale.current
+        let currencySymbol = locale.currencySymbol
+        billField.placeholder = currencySymbol
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,11 +33,22 @@ class ViewController: UIViewController {
         let defaults = UserDefaults.standard
         let tip = defaults.integer(forKey: "tip_percentage")
         tipControl.selectedSegmentIndex = tip
-        let bill = defaults.double(forKey:"bill_value")
+        var bill = defaults.double(forKey:"bill_value")
+        let last_time = defaults.object(forKey: "last_time") as! NSDate
+
+        if(last_time != nil){
+            let time_diff = last_time.timeIntervalSinceNow as! TimeInterval
+            if(time_diff < -600){ //600 seconds back = 10 minutes
+                bill = 0
+            }
+            
+        }
+        
         if(bill != 0){
             billField.text = String(format: "%.2f", bill)
         }
         updateTip()
+        billField.becomeFirstResponder()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -57,8 +71,10 @@ class ViewController: UIViewController {
         let bill = Double(billField.text!) ?? 0
         let tip = bill * tipPercentages[tipControl.selectedSegmentIndex]
         let total = bill + tip
-        tipLabel.text = String(format: "$%.2f", tip)
-        totalLabel.text = String(format: "$%.2f", total)
+        tipLabel.text = NumberFormatter.localizedString(from: NSNumber(value: tip), number: NumberFormatter.Style.currency)
+        totalLabel.text = NumberFormatter.localizedString(from: NSNumber(value: total), number: NumberFormatter.Style.currency)
     }
+    
+    
 }
 
